@@ -287,7 +287,8 @@ def render_image(img):
     cmdqueue += format_message(ControlLattice, PrintLattice)
 
     if img.width > PrinterWidth:
-        print("larger", img.width)
+        if debug:
+            print("larger", img.width)
         # image is wider than printer resolution; scale it down proportionately
         scale = PrinterWidth / img.width
         if scale_feed:
@@ -295,7 +296,8 @@ def render_image(img):
             feed_lines = int(feed_lines * scale)
         img = img.resize((PrinterWidth, int(img.height * scale)))
     if img.width < PrinterWidth:
-        print("smaller", img.width)
+        if debug:
+            print("smaller", img.width)
         # scale up to largest whole multiple
         scale = PrinterWidth // img.width
         if scale_feed:
@@ -306,7 +308,8 @@ def render_image(img):
 
     img = img.convert("1")
     if img.width < PrinterWidth:
-        print("doing something here")
+        if debug:
+            print("doing something here")
         # image is narrower than printer resolution
         # pad it out with white pixels
         pad_amount = (PrinterWidth - img.width)
@@ -363,12 +366,22 @@ def fortune_print():
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
     text = create_text(dt_string)
-    text2 = PIL.Image.open("date.png")
     image1 = PIL.Image.open("fortunes/good-luck-reset.png")
     # image1 = PIL.Image.open("images/gracie.png")
     # image2 = PIL.Image.open("fortunes/average-fortune.png")
     # print_data = print_data + render_image(text) + render_image(image1) + render_image(image2)
     print_data = print_data + render_image(text) + render_image(image1)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(connect_and_send(print_data))
+
+def cleanse_print():
+    print_data = request_status()
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
+    text = create_text(dt_string)
+    image1 = PIL.Image.open("fortunes/fortune-cleanse.png")
+    image2 = PIL.Image.open("fortunes/good-luck-reset.png")
+    print_data = print_data + render_image(text) + render_image(image1) + render_image(image2)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
 
@@ -385,6 +398,9 @@ while True:
         loop.run_until_complete(connect_device())
     elif word == "3" or word == "quit":
         break
+    if word == "99" or word == "cleanse":
+        print("Right away!!!!")
+        cleanse_print()
     else:
         print("I'm sorry, I didn't understand that.")
     print()
