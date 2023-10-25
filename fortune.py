@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import asyncio
+import os
+import random
 import argparse
+
 
 from bleak import BleakClient, BleakScanner
 from bleak.exc import BleakError
@@ -101,7 +104,7 @@ PrinterWidth = 384
 ImgPrintSpeed = [0x01]
 BlankSpeed = [0x19]
 
-feed_lines = 112
+feed_lines = 80
 header_lines = 0
 scale_feed = False
 
@@ -171,7 +174,8 @@ async def connect_and_send(data):
         await scanner.stop()
 
     if not device:
-        raise BleakError(f"The printer was not found.")
+        print("The printer could not be found :(")
+        return
     async with BleakClient(device) as client:
         # Set up callback to handle messages from the printer
         await client.start_notify(NotifyCharacteristic, notification_handler)
@@ -345,13 +349,13 @@ def render_image(img):
     return cmdqueue
 
 fortune_dict = {
-  "bad": "bad-fortune", # 0
-  "not-great": "not-great-fortune", # 10s
-  "below-average": "below-average-fortune", # 20s
+  "bad": "bad-fortune.png", # 0
+  "not-great": "not-great-fortune.png", # 10s
+  "below-average": "below-average-fortune.png", # 20s
   "average": "average-fortune.png", # 30s+40s
   "above-average": "above-average-fortune.png", # 50s+60s
   "great": "great-fortune.png", # 70s+80s
-  "spectacular": "spectacular-fortune", # 90s
+  "spectacular": "spectacular-fortune.png", # 90s
 }
 
 def fortune_greet():
@@ -362,15 +366,84 @@ def fortune_greet():
     print("3. Quit")
 
 def fortune_print():
-    print_data = request_status()
+    # Get time
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
-    text = create_text(dt_string)
-    image1 = PIL.Image.open("fortunes/good-luck-reset.png")
-    # image1 = PIL.Image.open("images/gracie.png")
-    # image2 = PIL.Image.open("fortunes/average-fortune.png")
-    # print_data = print_data + render_image(text) + render_image(image1) + render_image(image2)
-    print_data = print_data + render_image(text) + render_image(image1)
+    date_img = create_text(dt_string)
+
+    # Get dog of fate
+    directory_path = 'dogs'
+    file_list = os.listdir(directory_path)
+    file_list.sort()
+    indices = [index for index, element in enumerate(file_list)]
+    random_index = random.choice(indices)
+    random_index = 1
+    if debug:
+        print(f"The randomly chosen file is: {file_list[random_index]}, {random_index}")
+    dog_img_path = f"dogs/{file_list[random_index]}"
+
+    # Get fortune
+    fortune_name = fortune_dict["average"]
+    if random_index == 0:
+        fortune_name = fortune_dict["bad"]
+    elif random_index < 10:
+        fortune_name = fortune_dict["not-great"]
+    elif random_index < 20:
+        fortune_name = fortune_dict["below-average"]
+    elif random_index < 50:
+        fortune_name = fortune_dict["average"]
+    elif random_index < 70:
+        fortune_name = fortune_dict["above-average"]
+    elif random_index < 90:
+        fortune_name = fortune_dict["great"]
+    elif random_index < 100:
+        fortune_name = fortune_dict["spectacular"]
+    fortune_path = f"fortunes/{fortune_name}"
+
+
+    if random_index == 0:
+        print_bad_fortune(date_img, fortune_path)
+    elif random_index >= 90 and random_index <100:
+        print_spectacular_fortune(file_list, date_img, fortune_path)
+    else:
+        print_normal_fortune(date_img, dog_img_path, fortune_path)
+
+
+def print_bad_fortune(date_img, fortune_path):
+    print_data = request_status()
+    image1 = PIL.Image.open(fortune_path)
+    print_data = print_data + render_image(date_img) + render_image(image1) +  blank_paper(feed_lines)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(connect_and_send(print_data))
+
+def print_spectacular_fortune(file_list, date_img, fortune_path):
+    print_data = request_status()
+    random_numbers = random.sample(range(90, 100), 2)
+    dog0 = f"dogs/{file_list[random_numbers[0]]}"
+    dog1 = f"dogs/{file_list[random_numbers[1]]}"
+    image1 = PIL.Image.open(dog0)
+    image2 = PIL.Image.open(dog1)
+    image3 = PIL.Image.open(fortune_path)
+    print_data += render_image(date_img)
+    print_data += render_image(image1)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(connect_and_send(print_data))
+    print("done send")
+    loop.run_until_complete(asyncio.sleep(9))
+    print("next part")
+
+    print_data = request_status()
+    print_data += render_image(image2)
+    print_data += render_image(image3)
+    print_data += blank_paper(feed_lines)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(connect_and_send(print_data))
+
+def print_normal_fortune(date_img, dog_img_path, fortune_path):
+    print_data = request_status()
+    image1 = PIL.Image.open(dog_img_path)
+    image2 = PIL.Image.open(fortune_path)
+    print_data = print_data + render_image(date_img) + render_image(image1) + render_image(image2) +  blank_paper(feed_lines)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
 
@@ -381,9 +454,17 @@ def cleanse_print():
     text = create_text(dt_string)
     image1 = PIL.Image.open("fortunes/fortune-cleanse.png")
     image2 = PIL.Image.open("fortunes/good-luck-reset.png")
-    print_data = print_data + render_image(text) + render_image(image1) + render_image(image2)
+    print_data = print_data + render_image(text) + render_image(image1) + render_image(image2) +  blank_paper(feed_lines)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
+
+parser = argparse.ArgumentParser(
+    description="Prints a given image to a GB01 thermal printer.")
+parser.add_argument("-D", "--debug",
+                    help="output notifications received from printer, in hex",
+                    action="store_true")
+args = parser.parse_args()
+debug = args.debug
 
 while True:
     fortune_greet()
@@ -398,9 +479,10 @@ while True:
         loop.run_until_complete(connect_device())
     elif word == "3" or word == "quit":
         break
-    if word == "99" or word == "cleanse":
+    elif word == "99" or word == "cleanse":
         print("Right away!!!!")
         cleanse_print()
     else:
         print("I'm sorry, I didn't understand that.")
     print()
+
