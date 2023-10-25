@@ -4,6 +4,9 @@ import argparse
 
 from bleak import BleakClient, BleakScanner
 from bleak.exc import BleakError
+from datetime import datetime
+
+
 
 import PIL.Image
 import PIL.ImageFont
@@ -92,6 +95,7 @@ energy = {
 }
 contrast = 2
 
+# PrinterWidth = 384
 PrinterWidth = 384
 
 ImgPrintSpeed = [0x01]
@@ -112,10 +116,10 @@ device = None
 # show notification data
 debug = False
 
-
 def detect_printer(detected, advertisement_data):
     global device
-    print(detected.name)
+    if debug:
+        print(detected.name)
     if address:
         cut_addr = detected.address.replace(":", "")[-(len(address)):].upper()
         if cut_addr != address:
@@ -145,14 +149,26 @@ def notification_handler(sender, data):
         return
 
 
-async def connect_and_send(data):
+async def connect_device():
     scanner = BleakScanner(detection_callback=detect_printer)
     await scanner.start()
     for x in range(200):
         await asyncio.sleep(0.1)
         if device:
+            print("Printer connected.")
             break
     await scanner.stop()
+
+async def connect_and_send(data):
+    if not device:
+        scanner = BleakScanner(detection_callback=detect_printer)
+        await scanner.start()
+        for x in range(200):
+            await asyncio.sleep(0.1)
+            if device:
+                print("Printer connected.")
+                break
+        await scanner.stop()
 
     if not device:
         raise BleakError(f"The printer was not found.")
@@ -225,8 +241,8 @@ def trim(im):
     if bbox:
         return im.crop((bbox[0],bbox[1],bbox[2],bbox[3]+10)) # don't cut off the end of the image
 
-def create_text(text, font_name="Everson Mono.ttf", font_size=30):
-    img = PIL.Image.new('RGB', (PrinterWidth, 5000), color = (255, 255, 255))
+def create_text(text, font_name="thermal-receipt.otf", font_size=30):
+    img = PIL.Image.new('RGB', (PrinterWidth, 50), color = (255, 255, 255))
     font = PIL.ImageFont.truetype(font_name, font_size)
     
     d = PIL.ImageDraw.Draw(img)
@@ -234,8 +250,8 @@ def create_text(text, font_name="Everson Mono.ttf", font_size=30):
     for line in text.splitlines():
         lines.append(get_wrapped_text(line, font, PrinterWidth))
     lines = "\n".join(lines)
-    d.text((0,0), lines, fill=(0,0,0), font=font)
-    return trim(img)
+    d.text((40,12), lines, fill=(0,0,0), font=font)
+    return img
 
 quality1 = [0x51, 0x78, 0xA4, 0x00, 0x01, 0x00, 0x32, 0x9e, 0xFF]
 quality5 = [0x51, 0x78, 0xA4, 0x00, 0x01, 0x00, 0x35, 0x8B, 0xFF]
@@ -271,15 +287,15 @@ def render_image(img):
     cmdqueue += format_message(ControlLattice, PrintLattice)
 
     if img.width > PrinterWidth:
-        print("larger")
+        print("larger", img.width)
         # image is wider than printer resolution; scale it down proportionately
         scale = PrinterWidth / img.width
         if scale_feed:
             header_lines = int(header_lines * scale)
             feed_lines = int(feed_lines * scale)
         img = img.resize((PrinterWidth, int(img.height * scale)))
-    if img.width < (PrinterWidth // 2):
-        print("smaller")
+    if img.width < PrinterWidth:
+        print("smaller", img.width)
         # scale up to largest whole multiple
         scale = PrinterWidth // img.width
         if scale_feed:
@@ -287,14 +303,15 @@ def render_image(img):
             feed_lines = int(feed_lines * scale)
         img = img.resize((img.width * scale, img.height * scale), resample=PIL.Image.NEAREST)
     # convert image to black-and-white 1bpp color format
-    # img = img.convert("RGB")
+
     img = img.convert("1")
     if img.width < PrinterWidth:
+        print("doing something here")
         # image is narrower than printer resolution
         # pad it out with white pixels
-        pad_amount = (PrinterWidth - img.width) // 2
+        pad_amount = (PrinterWidth - img.width)
         padded_image = PIL.Image.new("1", (PrinterWidth, img.height), 1)
-        padded_image.paste(img, box=(pad_amount, 0))
+        padded_image.paste(img, box=(0, pad_amount))
         img = padded_image
 
     if header_lines:
@@ -324,76 +341,50 @@ def render_image(img):
 
     return cmdqueue
 
+fortune_dict = {
+  "bad": "bad-fortune", # 0
+  "not-great": "not-great-fortune", # 10s
+  "below-average": "below-average-fortune", # 20s
+  "average": "average-fortune.png", # 30s+40s
+  "above-average": "above-average-fortune.png", # 50s+60s
+  "great": "great-fortune.png", # 70s+80s
+  "spectacular": "spectacular-fortune", # 90s
+}
 
-parser = argparse.ArgumentParser(
-    description="Prints a given image to a GB01 thermal printer.")
-name_args = parser.add_mutually_exclusive_group(required=True)
-name_args.add_argument("filename", nargs='?',
-                       help="file name of an image to print")
-name_args.add_argument("-e", "--eject",
-                       help="don't print an image, just feed some blank paper",
-                       action="store_true")
-feed_args = parser.add_mutually_exclusive_group()
-feed_args.add_argument("-E", "--no-eject",
-                       help="don't feed blank paper after printing the image",
-                       action="store_true")
-feed_args.add_argument("-f", "--feed", type=int, default=feed_lines, metavar="LINES",
-                       help="amount of blank paper to feed (default: {})".format(feed_lines))
-parser.add_argument("--header", type=int, metavar="LINES",
-                    help="feed blank paper before printing the image")
-parser.add_argument("--scale-feed",
-                    help="adjust blank paper feed proportionately when resizing image",
-                    action="store_true")
-contrast_args = parser.add_mutually_exclusive_group()
-contrast_args.add_argument("-l", "--light",
-                           help="use less energy for light contrast",
-                           action="store_const", dest="contrast", const=0)
-contrast_args.add_argument("-m", "--medium",
-                           help="use moderate energy for moderate contrast",
-                           action="store_const", dest="contrast", const=1)
-contrast_args.add_argument("-d", "--dark",
-                           help="use more energy for high contrast",
-                           action="store_const", dest="contrast", const=2)
-parser.add_argument("-A", "--address",
-                    help="MAC address of printer in hex (rightmost digits, colons optional)")
-parser.add_argument("--text",
-                    help="text to print")
-parser.add_argument("--text-size",
-                    help="size to print")
-parser.add_argument("-D", "--debug",
-                    help="output notifications received from printer, in hex",
-                    action="store_true")
-throttle_args = parser.add_mutually_exclusive_group()
-throttle_args.add_argument("-t", "--throttle", type=float, default=throttle, metavar="SECONDS",
-                           help="delay between sending command queue packets (default: {})".format(throttle),)
-throttle_args.add_argument("-T", "--no-throttle",
-                           help="don't wait while sending data",
-                           action="store_const", dest="throttle", const=None)
-parser.add_argument("-p", "--packetsize", type=int, default=packet_length, metavar="BYTES",
-                    help="length of a command queue packet (default: {})".format(packet_length))
-args = parser.parse_args()
-debug = args.debug
-if args.contrast:
-    contrast = args.contrast
-if args.address:
-    address = args.address.replace(':', '').upper()
-if args.text:
-    text_to_print = args.text
-throttle = args.throttle
-packet_length = args.packetsize
-feed_lines = args.feed
-header_lines = args.header
-if args.scale_feed:
-    scale_feed = True
+def fortune_greet():
+    print("WELCOME TO THE FORTUNE MACHINE")
+    print("How may I help you?")
+    print("1. Get fortune")
+    print("2. Reconnect printer")
+    print("3. Quit")
 
-print_data = request_status()
-if not args.eject and not args.text:
-    image = PIL.Image.open(args.filename)
-    print_data = print_data + render_image(image)
-if args.text:
-    image = create_text(text_to_print)
-    print_data = print_data + render_image(image)
-if not args.no_eject:
-    print_data = print_data + blank_paper(feed_lines)
-loop = asyncio.get_event_loop()
-loop.run_until_complete(connect_and_send(print_data))
+def fortune_print():
+    print_data = request_status()
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
+    text = create_text(dt_string)
+    text2 = PIL.Image.open("date.png")
+    image1 = PIL.Image.open("fortunes/good-luck-reset.png")
+    # image1 = PIL.Image.open("images/gracie.png")
+    # image2 = PIL.Image.open("fortunes/average-fortune.png")
+    # print_data = print_data + render_image(text) + render_image(image1) + render_image(image2)
+    print_data = print_data + render_image(text) + render_image(image1)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(connect_and_send(print_data))
+
+while True:
+    fortune_greet()
+    word = input("> ").lower()
+    if word == "1" or word == "fortune":
+        print("Certainly. Fortune printing.")
+        fortune_print()
+    elif word == "2" or word == "reconnect printer":
+        device = None
+        print("Certainly. Reconnecting...")
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(connect_device())
+    elif word == "3" or word == "quit":
+        break
+    else:
+        print("I'm sorry, I didn't understand that.")
+    print()
