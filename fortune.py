@@ -381,6 +381,8 @@ def fortune_print():
     random_index = random.choice(indices)
     if fixed_index and fixed_index >= 0 and fixed_index < 100:
         random_index = fixed_index
+        if debug:
+            print("setting to fixed index:", fixed_index)
     if debug:
         print(f"The randomly chosen file is: {file_list[random_index]}, {random_index}")
     dog_img_path = f"dogs/{file_list[random_index]}"
@@ -431,9 +433,7 @@ def print_spectacular_fortune(file_list, date_img, fortune_path):
     print_data += render_image(image1)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
-    print("done send")
     loop.run_until_complete(asyncio.sleep(9))
-    print("next part")
 
     print_data = request_status()
     print_data += render_image(image2)
@@ -466,12 +466,13 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-D", "--debug",
                     help="output notifications received from printer, in hex",
                     action="store_true")
-parser.add_argument("-i", "--index", type=int, default=packet_length, metavar="INDEX",
+parser.add_argument("-i", "--index", type=int, default=None, metavar="INDEX",
                     help="set the specific index to use (0-100)")
 
 args = parser.parse_args()
 debug = args.debug
-fixed_index = args.index
+if args.index:
+    fixed_index = args.index
 
 while True:
     fortune_greet()
