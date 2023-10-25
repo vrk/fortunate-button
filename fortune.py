@@ -115,6 +115,7 @@ address = None
 PrinterCharacteristic = "0000AE01-0000-1000-8000-00805F9B34FB"
 NotifyCharacteristic = "0000AE02-0000-1000-8000-00805F9B34FB"
 device = None
+fixed_index = None
 
 # show notification data
 debug = False
@@ -363,7 +364,8 @@ def fortune_greet():
     print("How may I help you?")
     print("1. Get fortune")
     print("2. Reconnect printer")
-    print("3. Quit")
+    print("3. Get a specific fortune")
+    print("4. Quit")
 
 def fortune_print():
     # Get time
@@ -377,7 +379,8 @@ def fortune_print():
     file_list.sort()
     indices = [index for index, element in enumerate(file_list)]
     random_index = random.choice(indices)
-    random_index = 1
+    if fixed_index and fixed_index >= 0 and fixed_index < 100:
+        random_index = fixed_index
     if debug:
         print(f"The randomly chosen file is: {file_list[random_index]}, {random_index}")
     dog_img_path = f"dogs/{file_list[random_index]}"
@@ -463,8 +466,12 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-D", "--debug",
                     help="output notifications received from printer, in hex",
                     action="store_true")
+parser.add_argument("-i", "--index", type=int, default=packet_length, metavar="INDEX",
+                    help="set the specific index to use (0-100)")
+
 args = parser.parse_args()
 debug = args.debug
+fixed_index = args.index
 
 while True:
     fortune_greet()
@@ -477,7 +484,16 @@ while True:
         print("Certainly. Reconnecting...")
         loop = asyncio.get_event_loop()
         loop.run_until_complete(connect_device())
-    elif word == "3" or word == "quit":
+    elif word == "3" or word == "get specific fortune":
+        print("Certainly. Please enter a number between 0 and 99:")
+        fixed_input = int(input("> "))
+        if fixed_input and fixed_input >= 0 and fixed_input < 100:
+            fixed_index = fixed_input
+            fortune_print()
+            fixed_index = None
+        else:
+            print("Invalid input, not printing fortune")
+    elif word == "4" or word == "quit":
         break
     elif word == "99" or word == "cleanse":
         print("Right away!!!!")
