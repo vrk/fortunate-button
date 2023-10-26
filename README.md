@@ -17,7 +17,12 @@ What to do when starting from a fresh raspberry pi lite install:
 - `pip install --upgrade bleak`
 - `pip install --upgrade Pillow RPi.GPIO gpiozero`
 - `sudo apt-get install libopenjp2-7`
+- `sudo pip3 install Pillow --break-system-packages` <- needed for running root
 - [Start script on launch](https://learn.sparkfun.com/tutorials/how-to-run-a-raspberry-pi-program-on-startup#method-1-rclocal)
   - `sudo vim nano /etc/rc.local`
-  - Add `sudo bash -c '/usr/bin/python3 /home/vrk/fortunate-button/fortune-pi.py > /home/pi/blink.log 2>&1' &` before exit
+  - add:
+    ```
+    sudo bash -c 'source /home/vrk/fortunate-button/env/bin/activate > /home/vrk/blink1.log 2>&1' &
+    sudo bash -c 'sudo -H -u vrk python3 /home/vrk/fortunate-button/fortune-pi.py > /home/vrk/blink2.log 2>&1' &
+    ```
 
