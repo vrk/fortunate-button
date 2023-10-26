@@ -6,11 +6,10 @@ import argparse
 import time
 
 
-
 from bleak import BleakClient, BleakScanner
 from bleak.exc import BleakError
 from datetime import datetime
-from gpiozero import Button
+from gpiozero import Button, PWMLED
 
 import PIL.Image
 import PIL.ImageFont
@@ -478,46 +477,29 @@ if args.index:
 fortune_button = Button(3)
 cleanse_button = Button(22)
 restart_button = Button(27)
+led = PWMLED(18)
+led.value = 0.25
+led.on()
 
 while True:
     if fortune_button.is_pressed:
-        print("Button is pressed")
-    else:
-        print("Button is not pressed")
-    time.sleep(0.1)
-
-
-print("hiiii")
-fortune_button.wait_for_press()
-print('You pushed me')
-
-
-while False:
-    fortune_greet()
-    word = input("> ").lower()
-    if word == "1" or word == "fortune":
-        print("Certainly. Fortune printing.")
+        led.blink()
         fortune_print()
-    elif word == "2" or word == "reconnect printer":
+        print("Button is pressed")
+        led.off()
+        led.on()
+    elif cleanse_button.is_pressed:
+        led.blink()
+        cleanse_print()
+        led.off()
+        led.on()
+    elif restart_button.is_pressed:
+        led.blink()
         device = None
         print("Certainly. Reconnecting...")
         loop = asyncio.get_event_loop()
         loop.run_until_complete(connect_device())
-    elif word == "3" or word == "get specific fortune":
-        print("Certainly. Please enter a number between 0 and 99:")
-        fixed_input = int(input("> "))
-        if fixed_input and fixed_input >= 0 and fixed_input < 100:
-            fixed_index = fixed_input
-            fortune_print()
-            fixed_index = None
-        else:
-            print("Invalid input, not printing fortune")
-    elif word == "4" or word == "quit":
-        break
-    elif word == "99" or word == "cleanse":
-        print("Right away!!!!")
-        cleanse_print()
-    else:
-        print("I'm sorry, I didn't understand that.")
-    print()
+        led.off()
+        led.on()
+    time.sleep(0.1)
 
