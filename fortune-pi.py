@@ -447,7 +447,7 @@ def print_normal_fortune(date_img, dog_img_path, fortune_path):
 def cleanse_print():
     print_data = request_status()
     now = datetime.now()
-    dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
+    dt_string = now.strftime("%m/%d/%Y %I:%M:%S %p")
     text = create_text(dt_string)
     image1 = Image.open("/home/vrk/fortunate-button/fortunes/fortune-cleanse.png")
     image2 = Image.open("/home/vrk/fortunate-button/fortunes/good-luck-reset.png")
