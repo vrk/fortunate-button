@@ -392,17 +392,17 @@ def fortune_print():
     if random_index == 0:
         fortune_name = fortune_dict["bad"]
     elif random_index < 10:
-        fortune_name = fortune_dict["not-great"]
+        fortune_name = fortune_dict["not-great"] # 000
     elif random_index < 20:
-        fortune_name = fortune_dict["below-average"]
+        fortune_name = fortune_dict["below-average"] # bbb
     elif random_index < 50:
         fortune_name = fortune_dict["average"]
     elif random_index < 70:
-        fortune_name = fortune_dict["above-average"]
+        fortune_name = fortune_dict["above-average"] # ggg
     elif random_index < 90:
-        fortune_name = fortune_dict["great"]
+        fortune_name = fortune_dict["great"] # iii
     elif random_index < 100:
-        fortune_name = fortune_dict["spectacular"]
+        fortune_name = fortune_dict["spectacular"] # zzz
     fortune_path = f"fortunes/{fortune_name}"
 
 
