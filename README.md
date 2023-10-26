@@ -22,6 +22,11 @@ What to do when starting from a fresh raspberry pi lite install:
   - add:
     ```
     sudo bash -c 'source /home/vrk/fortunate-button/env/bin/activate > /home/vrk/blink1.log 2>&1' &
-    sudo bash -c 'python3 /home/vrk/fortunate-button/fortune-pi.py > /home/vrk/blink2.log 2>&1' &
+    sudo python3 /home/vrk/fortunate-button/fortune-pi.py &
     ```
+
+### Viewing logs of background process
+
+1. get the process id: `sudo ps -ax | grep python`
+2. `sudo strace -p <PID> -e write`
 
