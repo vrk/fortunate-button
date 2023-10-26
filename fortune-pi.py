@@ -238,7 +238,7 @@ def trim(im):
     if bbox:
         return im.crop((bbox[0],bbox[1],bbox[2],bbox[3]+10)) # don't cut off the end of the image
 
-def create_text(text, font_name="thermal-receipt.otf", font_size=30):
+def create_text(text, font_name="/home/vrk/fortunate-button/thermal-receipt.otf", font_size=30):
     img = PIL.Image.new('RGB', (PrinterWidth, 50), color = (255, 255, 255))
     font = PIL.ImageFont.truetype(font_name, font_size)
     
@@ -366,7 +366,7 @@ def fortune_print():
     date_img = create_text(dt_string)
 
     # Get dog of fate
-    directory_path = 'dogs'
+    directory_path = '/home/vrk/fortunate-button/dogs'
     file_list = os.listdir(directory_path)
     file_list.sort()
     indices = [index for index, element in enumerate(file_list)]
@@ -377,7 +377,7 @@ def fortune_print():
             print("setting to fixed index:", fixed_index)
     if debug:
         print(f"The randomly chosen file is: {file_list[random_index]}, {random_index}")
-    dog_img_path = f"dogs/{file_list[random_index]}"
+    dog_img_path = f"/home/vrk/fortunate-button/dogs/{file_list[random_index]}"
 
     # Get fortune
     fortune_name = fortune_dict["average"]
@@ -395,7 +395,7 @@ def fortune_print():
         fortune_name = fortune_dict["great"]
     elif random_index < 100:
         fortune_name = fortune_dict["spectacular"]
-    fortune_path = f"fortunes/{fortune_name}"
+    fortune_path = f"/home/vrk/fortunate-button/fortunes/{fortune_name}"
 
 
     if random_index == 0:
@@ -416,8 +416,8 @@ def print_bad_fortune(date_img, fortune_path):
 def print_spectacular_fortune(file_list, date_img, fortune_path):
     print_data = request_status()
     random_numbers = random.sample(range(90, 100), 2)
-    dog0 = f"dogs/{file_list[random_numbers[0]]}"
-    dog1 = f"dogs/{file_list[random_numbers[1]]}"
+    dog0 = f"/home/vrk/fortunate-button/dogs/{file_list[random_numbers[0]]}"
+    dog1 = f"/home/vrk/fortunate-button/dogs/{file_list[random_numbers[1]]}"
     image1 = PIL.Image.open(dog0)
     image2 = PIL.Image.open(dog1)
     image3 = PIL.Image.open(fortune_path)
@@ -447,8 +447,8 @@ def cleanse_print():
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
     text = create_text(dt_string)
-    image1 = PIL.Image.open("fortunes/fortune-cleanse.png")
-    image2 = PIL.Image.open("fortunes/good-luck-reset.png")
+    image1 = PIL.Image.open("/home/vrk/fortunate-button/fortunes/fortune-cleanse.png")
+    image2 = PIL.Image.open("/home/vrk/fortunate-button/fortunes/good-luck-reset.png")
     print_data = print_data + render_image(text) + render_image(image1) + render_image(image2) +  blank_paper(feed_lines)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
