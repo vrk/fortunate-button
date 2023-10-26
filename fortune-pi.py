@@ -164,15 +164,14 @@ async def connect_device():
     await scanner.stop()
 
 async def connect_and_send(data):
-    if not device:
-        scanner = BleakScanner(detection_callback=detect_printer)
-        await scanner.start()
-        for x in range(200):
-            await asyncio.sleep(0.1)
-            if device:
-                print("Printer connected.")
-                break
-        await scanner.stop()
+    scanner = BleakScanner(detection_callback=detect_printer)
+    await scanner.start()
+    for x in range(200):
+        await asyncio.sleep(0.1)
+        if device:
+            print("Printer connected.")
+            break
+    await scanner.stop()
 
     if not device:
         print("The printer could not be found :(")
@@ -475,8 +474,8 @@ if args.index:
     fixed_index = args.index
 
 fortune_button = Button(3)
-cleanse_button = Button(22)
-restart_button = Button(27)
+cleanse_button = Button(27)
+restart_button = Button(22)
 led = PWMLED(18)
 led.value = 0.25
 led.on()
@@ -494,12 +493,7 @@ while True:
         led.off()
         led.on()
     elif restart_button.is_pressed:
-        led.blink()
-        device = None
-        print("Certainly. Reconnecting...")
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(connect_device())
-        led.off()
-        led.on()
+        os.system('sudo shutdown -r now')
+
     time.sleep(0.1)
 
