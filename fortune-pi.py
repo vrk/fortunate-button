@@ -362,7 +362,7 @@ def fortune_greet():
 def fortune_print():
     # Get time
     now = datetime.now()
-    dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
+    dt_string = now.strftime("%m/%d/%Y %I:%M:%S %p")
     date_img = create_text(dt_string)
 
     # Get dog of fate
