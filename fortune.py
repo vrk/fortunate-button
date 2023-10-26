@@ -370,7 +370,7 @@ def fortune_greet():
 def fortune_print():
     # Get time
     now = datetime.now()
-    dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
+    dt_string = now.strftime("%m/%d/%Y %I:%M:%S %p")
     date_img = create_text(dt_string)
 
     # Get dog of fate
@@ -433,7 +433,7 @@ def print_spectacular_fortune(file_list, date_img, fortune_path):
     print_data += render_image(image1)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
-    # loop.run_until_complete(asyncio.sleep(9))
+    loop.run_until_complete(asyncio.sleep(5))
 
     print_data = request_status()
     print_data += render_image(image2)
