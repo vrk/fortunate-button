@@ -371,7 +371,11 @@ def fortune_print():
     directory_path = '/home/vrk/fortunate-button/dogs'
     file_list = os.listdir(directory_path)
     file_list.sort()
+    if debug:
+        print(file_list)
     indices = [index for index, element in enumerate(file_list)]
+    if debug:
+        print(indices)
     random_index = random.choice(indices)
     if fixed_index and fixed_index >= 0 and fixed_index < 100:
         random_index = fixed_index
@@ -427,7 +431,7 @@ def print_spectacular_fortune(file_list, date_img, fortune_path):
     print_data += render_image(image1)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
-    # loop.run_until_complete(asyncio.sleep(1))
+    loop.run_until_complete(asyncio.sleep(0.5))
 
     print_data = request_status()
     print_data += render_image(image2)
