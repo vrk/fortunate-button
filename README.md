@@ -14,8 +14,7 @@ What to do when starting from a fresh raspberry pi lite install:
 - `python -m venv env` then install the missing thing
 - `python -m venv env`
 - `source env/bin/activate`
-- `pip install --upgrade bleak`
-- `pip install --upgrade Pillow RPi.GPIO gpiozero`
+- `pip install --upgrade bleak Pillow RPi.GPIO gpiozero` (or maybe can use `python -m pip install -r requirements.txt`?)
 - `sudo apt-get install libopenjp2-7`
 - `sudo pip3 install Pillow --break-system-packages` <- needed for running script with root
 - [Start script on launch](https://learn.sparkfun.com/tutorials/how-to-run-a-raspberry-pi-program-on-startup#method-1-rclocal)
