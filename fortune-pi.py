@@ -11,10 +11,12 @@ from bleak.exc import BleakError
 from datetime import datetime
 from gpiozero import Button, PWMLED
 
-import PIL.Image
-import PIL.ImageFont
-import PIL.ImageDraw
-import PIL.ImageChops
+print("here")
+
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
+from PIL import ImageChops
 
 # CRC8 table extracted from APK, pretty standard though
 crc8_table = (
@@ -216,7 +218,7 @@ def blank_paper(lines):
         count = count - feed
     return blank_commands
 
-def get_wrapped_text(text: str, font: PIL.ImageFont.ImageFont,
+def get_wrapped_text(text: str, font: ImageFont.ImageFont,
                      line_length: int):
     if font.getlength(text) <= line_length:
         return text
@@ -231,18 +233,18 @@ def get_wrapped_text(text: str, font: PIL.ImageFont.ImageFont,
     return '\n'.join(lines)
 
 def trim(im):
-    bg = PIL.Image.new(im.mode, im.size, (255,255,255))
-    diff = PIL.ImageChops.difference(im, bg)
-    diff = PIL.ImageChops.add(diff, diff, 2.0)
+    bg = Image.new(im.mode, im.size, (255,255,255))
+    diff = ImageChops.difference(im, bg)
+    diff = ImageChops.add(diff, diff, 2.0)
     bbox = diff.getbbox()
     if bbox:
         return im.crop((bbox[0],bbox[1],bbox[2],bbox[3]+10)) # don't cut off the end of the image
 
 def create_text(text, font_name="/home/vrk/fortunate-button/thermal-receipt.otf", font_size=30):
-    img = PIL.Image.new('RGB', (PrinterWidth, 50), color = (255, 255, 255))
-    font = PIL.ImageFont.truetype(font_name, font_size)
+    img = Image.new('RGB', (PrinterWidth, 50), color = (255, 255, 255))
+    font = ImageFont.truetype(font_name, font_size)
     
-    d = PIL.ImageDraw.Draw(img)
+    d = ImageDraw.Draw(img)
     lines = []
     for line in text.splitlines():
         lines.append(get_wrapped_text(line, font, PrinterWidth))
@@ -300,7 +302,7 @@ def render_image(img):
         if scale_feed:
             header_lines = int(header_lines * scale)
             feed_lines = int(feed_lines * scale)
-        img = img.resize((img.width * scale, img.height * scale), resample=PIL.Image.NEAREST)
+        img = img.resize((img.width * scale, img.height * scale), resample=Image.NEAREST)
     # convert image to black-and-white 1bpp color format
 
     img = img.convert("1")
@@ -310,7 +312,7 @@ def render_image(img):
         # image is narrower than printer resolution
         # pad it out with white pixels
         pad_amount = (PrinterWidth - img.width)
-        padded_image = PIL.Image.new("1", (PrinterWidth, img.height), 1)
+        padded_image = Image.new("1", (PrinterWidth, img.height), 1)
         padded_image.paste(img, box=(0, pad_amount))
         img = padded_image
 
@@ -408,7 +410,7 @@ def fortune_print():
 
 def print_bad_fortune(date_img, fortune_path):
     print_data = request_status()
-    image1 = PIL.Image.open(fortune_path)
+    image1 = Image.open(fortune_path)
     print_data = print_data + render_image(date_img) + render_image(image1) +  blank_paper(feed_lines)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
@@ -418,9 +420,9 @@ def print_spectacular_fortune(file_list, date_img, fortune_path):
     random_numbers = random.sample(range(90, 100), 2)
     dog0 = f"/home/vrk/fortunate-button/dogs/{file_list[random_numbers[0]]}"
     dog1 = f"/home/vrk/fortunate-button/dogs/{file_list[random_numbers[1]]}"
-    image1 = PIL.Image.open(dog0)
-    image2 = PIL.Image.open(dog1)
-    image3 = PIL.Image.open(fortune_path)
+    image1 = Image.open(dog0)
+    image2 = Image.open(dog1)
+    image3 = Image.open(fortune_path)
     print_data += render_image(date_img)
     print_data += render_image(image1)
     loop = asyncio.get_event_loop()
@@ -436,8 +438,8 @@ def print_spectacular_fortune(file_list, date_img, fortune_path):
 
 def print_normal_fortune(date_img, dog_img_path, fortune_path):
     print_data = request_status()
-    image1 = PIL.Image.open(dog_img_path)
-    image2 = PIL.Image.open(fortune_path)
+    image1 = Image.open(dog_img_path)
+    image2 = Image.open(fortune_path)
     print_data = print_data + render_image(date_img) + render_image(image1) + render_image(image2) +  blank_paper(feed_lines)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
@@ -447,8 +449,8 @@ def cleanse_print():
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
     text = create_text(dt_string)
-    image1 = PIL.Image.open("/home/vrk/fortunate-button/fortunes/fortune-cleanse.png")
-    image2 = PIL.Image.open("/home/vrk/fortunate-button/fortunes/good-luck-reset.png")
+    image1 = Image.open("/home/vrk/fortunate-button/fortunes/fortune-cleanse.png")
+    image2 = Image.open("/home/vrk/fortunate-button/fortunes/good-luck-reset.png")
     print_data = print_data + render_image(text) + render_image(image1) + render_image(image2) +  blank_paper(feed_lines)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
