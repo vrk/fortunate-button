@@ -379,6 +379,8 @@ def fortune_print():
     file_list.sort()
     indices = [index for index, element in enumerate(file_list)]
     random_index = random.choice(indices)
+    if debug:
+        print(file_list)
     if fixed_index and fixed_index >= 0 and fixed_index < 100:
         random_index = fixed_index
         if debug:
