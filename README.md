@@ -22,6 +22,6 @@ What to do when starting from a fresh raspberry pi lite install:
   - add:
     ```
     sudo bash -c 'source /home/vrk/fortunate-button/env/bin/activate > /home/vrk/blink1.log 2>&1' &
-    sudo bash -c 'sudo -H -u vrk python3 /home/vrk/fortunate-button/fortune-pi.py > /home/vrk/blink2.log 2>&1' &
+    sudo bash -c 'python3 /home/vrk/fortunate-button/fortune-pi.py > /home/vrk/blink2.log 2>&1' &
     ```
 
