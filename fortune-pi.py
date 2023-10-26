@@ -477,12 +477,14 @@ led.on()
 
 while True:
     if fortune_button.is_pressed:
+        device = None
         led.blink()
         fortune_print()
         print("Button is pressed")
         led.off()
         led.on()
     elif cleanse_button.is_pressed:
+        device = None
         led.blink()
         cleanse_print()
         led.off()
