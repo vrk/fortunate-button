@@ -425,7 +425,7 @@ def print_spectacular_fortune(file_list, date_img, fortune_path):
     print_data += render_image(image1)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(connect_and_send(print_data))
-    loop.run_until_complete(asyncio.sleep(9))
+    loop.run_until_complete(asyncio.sleep(4))
 
     print_data = request_status()
     print_data += render_image(image2)
