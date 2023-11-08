@@ -4,7 +4,11 @@
 
 What to do when starting from a fresh raspberry pi lite install:
 
+On the machine you're sshing from:
 - Reset ssh keys so you can ssh in: `ssh-keygen -R <HOST>`
+- Then ssh in
+
+On the raspberry pi:
 - `sudo apt update`
 - `sudo apt upgrade`
 - `sudo apt install vim git pip`
