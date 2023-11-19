@@ -22,7 +22,7 @@ On the raspberry pi:
 - `sudo apt-get install libopenjp2-7`
 - `sudo pip3 install Pillow --break-system-packages` <- needed for running script with root
 - [Start script on launch](https://learn.sparkfun.com/tutorials/how-to-run-a-raspberry-pi-program-on-startup#method-1-rclocal)
-  - `sudo vim nano /etc/rc.local`
+  - `sudo vim /etc/rc.local`
   - add:
     ```
     sudo bash -c 'source /home/vrk/fortunate-button/env/bin/activate > /home/vrk/blink1.log 2>&1' &
