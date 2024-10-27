@@ -128,9 +128,10 @@ def detect_printer(detected, advertisement_data):
         cut_addr = detected.address.replace(":", "")[-(len(address)):].upper()
         if cut_addr != address:
             return
-    if detected.name == 'MX06' and detected.address == MY_CAT_PRINTER_ADDRESS:
+    if detected.name == 'MX06':
         device = detected
-        print(detected)
+        print(detected.address)
+        print(MY_CAT_PRINTER_ADDRESS)
 
 
 def notification_handler(sender, data):
