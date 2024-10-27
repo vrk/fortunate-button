@@ -525,6 +525,12 @@ SCREEN_WIDTH=root.winfo_screenwidth()
 SCREEN_HEIGHT=root.winfo_screenheight()
 dims = f"{SCREEN_WIDTH}x{SCREEN_HEIGHT}+0+0"
 
+def end_fullscreen(self, event=None):
+    root.attributes("-fullscreen", False)
+    root.geometry(dims)  # Set window size
+
+root.bind("<Escape>", end_fullscreen)
+
 root.geometry(dims)  # Set window size
 
 # Load an image
