@@ -118,6 +118,8 @@ fixed_index = None
 # show notification data
 debug = True
 
+MY_CAT_PRINTER_ADDRESS = 'CC8C82F2-AB64-4C93-7814-6374327A9284'
+
 def detect_printer(detected, advertisement_data):
     global device
     if debug:
@@ -126,7 +128,7 @@ def detect_printer(detected, advertisement_data):
         cut_addr = detected.address.replace(":", "")[-(len(address)):].upper()
         if cut_addr != address:
             return
-    if detected.name == 'MX06':
+    if detected.name == 'MX06' and detected.address == MY_CAT_PRINTER_ADDRESS:
         device = detected
         print(detected)
 

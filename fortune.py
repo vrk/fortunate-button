@@ -128,9 +128,8 @@ def detect_printer(detected, advertisement_data):
         cut_addr = detected.address.replace(":", "")[-(len(address)):].upper()
         if cut_addr != address:
             return
-    if detected.name == 'MX06':
+    if detected.name == 'MX06' and detected.address == 'CC8C82F2-AB64-4C93-7814-6374327A9284':
         device = detected
-
 
 def notification_handler(sender, data):
     global debug
