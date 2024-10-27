@@ -118,7 +118,8 @@ fixed_index = None
 # show notification data
 debug = True
 
-MY_CAT_PRINTER_ADDRESS = 'CC8C82F2-AB64-4C93-7814-6374327A9284'
+MY_CAT_PRINTER_MACOS_UUID = 'CC8C82F2-AB64-4C93-7814-6374327A9284'
+MY_CAT_PRINTER_LINUX_ADDR = 'C4:06:06:10:A5:52'
 
 def detect_printer(detected, advertisement_data):
     global device
@@ -129,9 +130,9 @@ def detect_printer(detected, advertisement_data):
         if cut_addr != address:
             return
     if detected.name == 'MX06':
-        device = detected
         print(detected.address)
-        print(MY_CAT_PRINTER_ADDRESS)
+        if detected.address == MY_CAT_PRINTER_MACOS_UUID or detected.address == MY_CAT_PRINTER_LINUX_ADDR:
+            device = detected
 
 
 def notification_handler(sender, data):
