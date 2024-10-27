@@ -547,6 +547,7 @@ photo = photo.convert('1', dither=PIL.Image.FLOYDSTEINBERG)
 
 image = PIL.ImageTk.PhotoImage(photo)
 
+helv24 = tkFont.Font(family='Helvetica', size=24, weight='bold')
 helv36 = tkFont.Font(family='Helvetica', size=36, weight='bold')
 
 
@@ -566,14 +567,17 @@ button_frame.pack(side=tk.LEFT, fill=tk.BOTH)
 button_height = SCREEN_HEIGHT // 5
 button_width = half_width - 5
 
+button1 = tk.Label(button_frame, text="DOGS OF FATE", font=helv36)
+button1.place(relx=0, rely=0, width=button_width, height=button_height)
+
 # Create three buttons and use place to center them vertically
-button1 = tk.Button(button_frame, text="GET FORTUNE", command=lambda: root.after(0, on_get_fortune), font=helv36)
+button1 = tk.Button(button_frame, text="Get Fortune", command=lambda: root.after(0, on_get_fortune), font=helv24)
 button1.place(relx=0, rely=0.2, width=button_width, height=button_height)
 
-button2 = tk.Button(button_frame, text="Cleanse", command=lambda: root.after(0, on_cleanse), font=helv36)
+button2 = tk.Button(button_frame, text="Cleanse Fortune", command=lambda: root.after(0, on_cleanse), font=helv24)
 button2.place(relx=0, rely=0.4, width=button_width, height=button_height)
 
-button3 = tk.Button(button_frame, text="Quit", command=on_quit, font=helv36)
+button3 = tk.Button(button_frame, text="Quit", command=on_quit, font=helv24)
 button3.place(relx=0, rely=0.6, width=button_width, height=button_height)
 
 async def main():
