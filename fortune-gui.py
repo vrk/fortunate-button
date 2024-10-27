@@ -186,7 +186,6 @@ async def connect_and_send(data):
             if throttle is not None:
                 await asyncio.sleep(throttle)
 
-
 def request_status():
     return format_message(GetDevState, [0x00])
 
@@ -418,7 +417,7 @@ async def print_bad_fortune(date_img, fortune_path):
     print_data = request_status()
     image1 = PIL.Image.open(fortune_path)
     print_data = print_data + render_image(date_img) + render_image(image1) +  blank_paper(feed_lines)
-    asyncio.create_task(connect_and_send(print_data))
+    await connect_and_send(print_data)
 
 async def print_spectacular_fortune(file_list, date_img, fortune_path):
     print_data = request_status()
@@ -430,21 +429,21 @@ async def print_spectacular_fortune(file_list, date_img, fortune_path):
     image3 = PIL.Image.open(fortune_path)
     print_data += render_image(date_img)
     print_data += render_image(image1)
-    asyncio.create_task(connect_and_send(print_data))
-    asyncio.create_task(asyncio.sleep(5))
+    await connect_and_send(print_data)
+    await asyncio.sleep(5)
 
     print_data = request_status()
     print_data += render_image(image2)
     print_data += render_image(image3)
     print_data += blank_paper(feed_lines)
-    asyncio.create_task(connect_and_send(print_data))
+    await connect_and_send(print_data)
 
 async def print_normal_fortune(date_img, dog_img_path, fortune_path):
     print_data = request_status()
     image1 = PIL.Image.open(dog_img_path)
     image2 = PIL.Image.open(fortune_path)
     print_data = print_data + render_image(date_img) + render_image(image1) + render_image(image2) +  blank_paper(feed_lines)
-    asyncio.create_task(connect_and_send(print_data))
+    await connect_and_send(print_data)
 
 async def cleanse_print():
     print_data = request_status()
@@ -454,7 +453,7 @@ async def cleanse_print():
     image1 = PIL.Image.open("fortunes/fortune-cleanse.png")
     image2 = PIL.Image.open("fortunes/good-luck-reset.png")
     print_data = print_data + render_image(text) + render_image(image1) + render_image(image2) +  blank_paper(feed_lines)
-    asyncio.create_task(connect_and_send(print_data))
+    await connect_and_send(print_data)
 
 parser = argparse.ArgumentParser(
     description="Prints a given image to a GB01 thermal printer.")
@@ -522,6 +521,8 @@ image_path = "dogs/eee-17.jpg"  # Replace with your image path
 photo = PIL.Image.open(image_path)
 half_width = int(SCREEN_WIDTH/2)
 photo = photo.resize((half_width, SCREEN_HEIGHT), PIL.Image.LANCZOS)
+photo = photo.convert('1', dither=PIL.Image.FLOYDSTEINBERG)
+
 image = PIL.ImageTk.PhotoImage(photo)
 
 helv36 = tkFont.Font(family='Helvetica', size=36, weight='bold')
