@@ -162,34 +162,36 @@ async def connect_device():
     for x in range(200):
         await asyncio.sleep(0.1)
         if device:
-            print("Printer connected.")
+            print("Printer connected 1.")
             break
     await scanner.stop()
 
 async def connect_and_send(data):
+    global device
     if not device:
         scanner = BleakScanner(detection_callback=detect_printer)
         await scanner.start()
         for x in range(200):
             await asyncio.sleep(0.1)
             if device:
-                print("Printer connected.")
+                print("Printer connected 2.")
                 break
         await scanner.stop()
 
     if not device:
         print("The printer could not be found :(")
         return
+    
     async with BleakClient(device) as client:
         # Set up callback to handle messages from the printer
         await client.start_notify(NotifyCharacteristic, notification_handler)
-
         while data:
             # Cut the command stream up into pieces small enough for the printer to handle
             await client.write_gatt_char(PrinterCharacteristic, bytearray(data[:packet_length]))
             data = data[packet_length:]
             if throttle is not None:
                 await asyncio.sleep(throttle)
+        device = None
 
 def request_status():
     return format_message(GetDevState, [0x00])
