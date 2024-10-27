@@ -475,6 +475,7 @@ from tkinter import ttk
 import tkinter as tk
 from tkinter import PhotoImage
 from tkinter import font as tkFont
+import sys
 
 
 # Function to handle button click
@@ -500,9 +501,17 @@ def on_cleanse():
     print("get cleanse")
     start_task_on_thread(cleanse_print)
 
+
+
 def on_quit():
     print("quit")
-    exit();
+    loop = asyncio.get_running_loop()
+    # TODO: This is not a good way to exit the run loop!
+    if loop.is_running():
+        loop.stop()
+    loop.close()
+    root.quit()
+    sys.exit('')
 
 
 # Create the main window
@@ -514,6 +523,7 @@ SCREEN_HEIGHT=root.winfo_screenheight()
 dims = f"{SCREEN_WIDTH}x{SCREEN_HEIGHT}+0+0"
 
 root.geometry(dims)  # Set window size
+root.attributes("-fullscreen", True)
 
 # Load an image
 # Ensure you have a suitable image file
