@@ -516,14 +516,13 @@ def on_quit():
 
 # Create the main window
 root = tk.Tk()
-root.title("Image and Buttons Layout")
+root.attributes("-fullscreen", True)
 
 SCREEN_WIDTH=root.winfo_screenwidth()
 SCREEN_HEIGHT=root.winfo_screenheight()
 dims = f"{SCREEN_WIDTH}x{SCREEN_HEIGHT}+0+0"
 
 root.geometry(dims)  # Set window size
-root.attributes("-fullscreen", True)
 
 # Load an image
 # Ensure you have a suitable image file
