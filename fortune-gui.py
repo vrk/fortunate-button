@@ -116,7 +116,7 @@ device = None
 fixed_index = None
 
 # show notification data
-debug = False
+debug = True
 
 def detect_printer(detected, advertisement_data):
     global device
@@ -128,6 +128,7 @@ def detect_printer(detected, advertisement_data):
             return
     if detected.name == 'MX06':
         device = detected
+        print(detected)
 
 
 def notification_handler(sender, data):
@@ -448,7 +449,7 @@ async def print_normal_fortune(date_img, dog_img_path, fortune_path):
 async def cleanse_print():
     print_data = request_status()
     now = datetime.now()
-    dt_string = now.strftime("%d/%m/%Y %I:%M:%S %p")
+    dt_string = now.strftime("%m/%d/%Y %I:%M:%S %p")
     text = create_text(dt_string)
     image1 = PIL.Image.open("fortunes/fortune-cleanse.png")
     image2 = PIL.Image.open("fortunes/good-luck-reset.png")
