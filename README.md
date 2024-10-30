@@ -2,7 +2,7 @@
 
 Press a button, get a dog fortune
 
-
+There are 7 possible fortunes and 100 possible dogs! I hand-picked 100 dogs from the [Dog API](https://dog.ceo/dog-api/) and added in a few celebrity dogs too (e.g. friends's dogs, my family dogs, instagram famous dogs). Each dog's vibe matches the fortune.
 
 https://github.com/user-attachments/assets/6c0732ae-f498-45e9-b4dc-c9e51773b407
 
