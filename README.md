@@ -9,6 +9,8 @@ I have 3 versions of the same script:
 - `fortunate-pi.py` - Physical button interface connnected to GPIO pins on a Raspberry Pi Zero
 - `fortunate-gui.py` - GUI interface, used on a Rasperry Pi 4 + display
 
+Demo of `fortunate-gui.py`:
+
 https://github.com/user-attachments/assets/6c0732ae-f498-45e9-b4dc-c9e51773b407
 
 
