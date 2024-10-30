@@ -1,4 +1,13 @@
-# fortunate-button
+# Dogs of Fate
+
+Press a button, get a dog fortune
+
+
+
+https://github.com/user-attachments/assets/6c0732ae-f498-45e9-b4dc-c9e51773b407
+
+
+
 
 ### RPI instructions
 
